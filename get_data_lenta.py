@@ -23,7 +23,6 @@ def crawl(word, links_list):
     articles_max = 150
     articles_visited = 0
     pbar = tqdm(desc="while loop", total=articles_max)
-
     while articles_visited < articles_max:
         button = driver.find_element(by=By.CLASS_NAME, value="loadmore__button")
         button.click()
@@ -54,8 +53,10 @@ def main():
         for link in tqdm(article_links):
             doc = requests.get(f'https://lenta.ru{link}', headers=headers)
             soup_article = BeautifulSoup(doc.text, "html.parser")
-            text = soup_article.find("div", class_="topic-body__content")
-            writer.writerow([text.text])
+            text = " "
+            paragraphs = [paragraph.text for paragraph in soup_article.find_all("p", class_="topic-body__content-text")]
+            text = text.join(paragraphs).strip()
+            writer.writerow([text])
 
 
 if __name__ == "__main__":
