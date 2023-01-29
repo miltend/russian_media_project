@@ -1,12 +1,10 @@
 import csv
-import requests
 import config
+import requests
+from tqdm import tqdm
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
-from tqdm import tqdm
-
-headers = {'User-Agent': config.HEADERS}
 
 
 def initiate_crawler(word):
@@ -37,7 +35,6 @@ def crawl(word, links_list):
             if link["href"] not in links_list:
                 links_list.append(link["href"])
                 articles_visited += 1
-        # links_list.extend(new_links)
         print(articles_visited, end="\r")
         pbar.update(articles_visited)
     pbar.close()
@@ -45,6 +42,7 @@ def crawl(word, links_list):
 
 
 def main():
+    headers = {'User-Agent': config.HEADERS}
     words = ["Россия", "Украина", "Путин", "Европа", "Зеленский"]
     article_links = []
     for word in words:
