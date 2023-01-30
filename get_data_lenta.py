@@ -47,7 +47,6 @@ def main():
     for word in words:
         crawl(word, article_links)
         print(len(article_links))
-
     with open("data_lenta.csv", "w", encoding="utf-8") as f:
         writer = csv.writer(f)
         for link in tqdm(article_links):
