@@ -7,28 +7,49 @@ from tqdm import tqdm
 
 # nltk.download("stopwords")
 
-punctuation += "«»— "
+punctuation += "«»— 1234567890"
 rus_stopwords = stopwords.words("russian")
 mystem = Mystem()
 
 
-def lemmatize(sentence):
-    tokens = " ".join([token.text.lower() for token in tokenize(sentence)]).strip()
-    lemmas = mystem.lemmatize(tokens)
-    lemmas = [lemma for lemma in lemmas if lemma not in rus_stopwords
-              and not set(lemma).intersection(punctuation)]
-    return lemmas
+def tokenize_test(sentence):
+    tokens = [token.text.lower() for token in tokenize(sentence)]
+    tokens = [token for token in tokens if token not in rus_stopwords
+              and not set(token).intersection(punctuation)]
+    return " ".join(tokens).strip()
 
 
-with open("data_lenta.csv", "r", encoding="utf-8") as f:
+def preprocess_text(doc):
+    new_sent = tokenize_test(doc)
+    tokens = mystem.lemmatize(new_sent)
+    tokens = [token for token in tokens if token != " "]
+    text = " ".join(tokens)
+    return text
+
+with open("data_lenta.txt", "r", encoding="utf-8") as f:
     text = f.readlines()
 
+with open("sentenized.txt", "w", encoding="utf-8") as f:
+    for line in tqdm(text):
+        sentences = [sent.text for sent in list(sentenize(line))]
+        for sentence in sentences:
+            if sentence:
+                f.write(sentence + "\n")
 
-# with open("lenta_lem.txt", "w", encoding="utf-8") as f:
-#     for line in tqdm(text):
-#         sentences = [sent.text for sent in list(sentenize(line))]
-#         for sentence in sentences:
-#             if sentence:
-#                 lemmas = lemmatize(sentence)
-#                 # print(lemmas)
-#                 f.write(" ".join(lemmas).strip() + "\n")
+
+with open("sentenized.txt", "r", encoding="utf-8") as f:
+    new_text = f.readlines()
+doc_split = []
+buf = []
+test = preprocess_text(' ‽ '.join(new_text))
+
+for x in tqdm(test.split(' ')):
+    if '‽' in x:
+        doc_split += [' '.join(buf) + "\n"]
+        buf = []
+    else:
+        buf += [x]
+doc_split += [' '.join(buf)]
+with open("lenta_lemmatized.txt", "w", encoding="utf-8") as f:
+    f.writelines(doc_split)
+
