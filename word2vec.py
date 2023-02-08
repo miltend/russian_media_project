@@ -1,7 +1,7 @@
 import gensim
 from gensim.models import word2vec
 
-medias = ["lenta", "tvRain"]
+# medias = ["lenta", "tvRain"]
 # for media in medias:
 #     data = word2vec.LineSentence(f"data/{media}_lemmatized.txt")
 #     model = gensim.models.Word2Vec(data, vector_size=300, window=2, min_count=2, workers=2, sg=1)
