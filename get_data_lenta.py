@@ -1,4 +1,3 @@
-import csv
 import config
 import requests
 from tqdm import tqdm
@@ -7,8 +6,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
-def initiate_crawler(word):
-    url = f"https://lenta.ru/search?query={word}#size=10|sort=2|domain=1|modified,format=yyyy-MM-dd|type=1"
+def initiate_crawler(url):
+    # url = f"https://lenta.ru/search?query={word}#size=10|sort=2|domain=1|modified,format=yyyy-MM-dd|type=1"
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
@@ -19,26 +18,30 @@ def initiate_crawler(word):
 
 
 def crawl(word, links_list):
-    driver = initiate_crawler(word)
-    articles_max = 1500
+
+    articles_max = 160
     articles_visited = 0
+    page = 0
     pbar = tqdm(desc="while loop", total=articles_max)
+
     while articles_visited < articles_max:
-        # print(articles_visited, articles_max)
-        button = driver.find_element(by=By.CLASS_NAME, value="loadmore__button")
-        button.click()
-        driver.implicitly_wait(0.6)
+        url = f"https://lenta.ru/search?query={word}#from={page}|size=10|sort=2|domain=1|modified," \
+                      "format=yyyy-MM-dd|type=1|modified,from=2022-01-01"
+        driver = initiate_crawler(url)
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, "lxml")
-        new_links = soup.find_all("a", class_="card-full-news")
+        new_links = soup.find_all("div", class_="b-search__result-item-title")
         visited_per_cycle = 0
+        page += 10
         for link in new_links:
-            if link["href"] not in links_list:
-                links_list.append(link["href"])
+            if link.a["href"] not in links_list:
+                links_list.append(link.a["href"])
                 articles_visited += 1
                 visited_per_cycle += 1
-        # print(visited_per_cycle, end="\r")
         pbar.update(visited_per_cycle)
+        button = driver.find_element(by=By.CLASS_NAME, value="js-search__paginator-next")
+        button.click()
+        driver.implicitly_wait(0.5)
     pbar.close()
     driver.quit()
 
@@ -50,10 +53,10 @@ def main():
     for word in words:
         crawl(word, article_links)
         print(len(article_links))
-    with open("data_lenta.txt", "w", encoding="utf-8") as f:
+    with open("data_lenta_new.txt", "w", encoding="utf-8") as f:
         # writer = csv.writer(f)
         for link in tqdm(article_links):
-            doc = requests.get(f'https://lenta.ru{link}', headers=headers)
+            doc = requests.get(link, headers=headers)
             soup_article = BeautifulSoup(doc.text, "html.parser")
             text = " "
             paragraphs = [paragraph.text for paragraph in soup_article.find_all("p", class_="topic-body__content-text")]
