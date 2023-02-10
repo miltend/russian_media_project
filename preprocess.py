@@ -8,7 +8,8 @@ from tqdm import tqdm
 # nltk.download("stopwords")
 punctuation += "«»— 1234567890"
 rus_stopwords = stopwords.words("russian")
-rus_stopwords.extend(["весь", "владимир", "com", "джо", "m", "михаил", "оба", "нужно"])
+rus_stopwords.extend(["весь", "владимир", "дмитрий", "com", "джо", "m", "михаил", "оба",
+                      "нужно", "который", "однако"])
 mystem = Mystem()
 
 
